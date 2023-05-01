@@ -1,0 +1,23 @@
+{
+  "name": "virtual-keyboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint src/ --ext .js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Djumanchik/virtual-keyboard.git"
+  },
+  "author": "djum",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Djumanchik/virtual-keyboard/issues"
+  },
+  "homepage": "https://github.com/Djumanchik/virtual-keyboard#readme",
+  "devDependencies": {
+    "eslint": "^8.39.0",
+    "eslint-config-airbnb-base": "^15.0.0"
+  }
+}
