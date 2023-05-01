@@ -1,3 +1,8 @@
+/* eslint-disable no-console */
+/* eslint-disable func-names */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-shadow */
+/* eslint-disable no-undef */
 const currentLanguage = 'en';
 const isShiftPressed = false;
 
@@ -238,34 +243,44 @@ const displayKeyboard = (keyboardLayout) => {
 
 displayKeyboard(keyboardLayout);
 
-document.onkeydown = function(event) {
+document.onkeydown = function (event) {
   console.log(event.code);
   console.log(event.key);
-  document.querySelectorAll('.keyboard__key').forEach(function(element) {
+  document.querySelectorAll('.keyboard__key').forEach((element) => {
     element.classList.remove('active');
   });
   document.getElementById(`${event.code}`).classList.add('active');
 };
 
-document.querySelectorAll('.keyboard__key').forEach(function(element) {
-  element.onclick = function(event) {
-    document.querySelectorAll('.keyboard__key').forEach(function(element) {
+document.querySelectorAll('.keyboard__key').forEach((element) => {
+  // eslint-disable-next-line no-param-reassign
+  element.onclick = function (event) {
+    document.querySelectorAll('.keyboard__key').forEach((element) => {
       element.classList.remove('active');
     });
-    let code = this.getAttribute('data');
+    const code = this.getAttribute('data');
     this.classList.add('active');
-  }
+  };
 });
 
 const display = document.querySelector('.text-area');
 const button = document.querySelectorAll('.keyboard__key');
 
-button.forEach(button => {
-  button.addEventListener('click', function() {
+// eslint-disable-next-line no-shadow
+button.forEach((button) => {
+  button.addEventListener('click', () => {
     if (button.classList.contains('space')) {
       display.textContent += ' ';
+    } else if (button.classList.contains('enter')) {
+      display.textContent += '\n';
     } else {
       display.textContent += button.textContent;
     }
-  })
+  });
 });
+
+document.addEventListener('keydown', function(event) {
+  if (event.code == 'CapsLock') {
+    display.textContent.toUpperCase() += button.textContent;
+  }
+})
