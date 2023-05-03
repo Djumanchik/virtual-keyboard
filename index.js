@@ -1,5 +1,6 @@
-const currentLanguage = 'en';
-const isShiftPressed = false;
+/* eslint-disable no-undef */
+let currentLanguage = 'en';
+let isShiftPressed = false;
 
 const text = document.createElement('h1');
 document.body.appendChild(text);
@@ -217,6 +218,14 @@ const keyboardLayout = [
   ],
 ];
 
+const keyboardCodeIndex = keyboardLayout.reduce((acc, row) => {
+  const rowCodes = row.reduce((acc, key) => {
+    acc[key.code] = key;
+    return acc;
+  }, {});
+  return { ...acc, ...rowCodes };
+}, {});
+
 const textArea = document.createElement('textarea');
 textArea.classList.add('text-area');
 document.body.appendChild(textArea);
@@ -238,37 +247,67 @@ const displayKeyboard = () => {
         : key.value[currentLanguage];
       keyEl.id = `${key.code}`;
       rowEl.appendChild(keyEl);
+
+      keyEl.onclick = function (event) {
+        keyEl.classList.add('active');
+        switch (key.code) {
+          case 'Space':
+            textArea.textContent += ' ';
+            break;
+          case 'Enter':
+            textArea.textContent += '\n';
+            break;
+          default:
+            textArea.textContent += key.value[currentLanguage];
+        }
+
+        setTimeout(() => keyEl.classList.remove('active'), 300);
+      };
     });
     keyboard.appendChild(rowEl);
   });
   document.body.appendChild(keyboard);
 };
+displayKeyboard();
 
-displayKeyboard(keyboardLayout);
+const button = document.querySelectorAll('.keyboard__key');
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   textArea.focus();
+
+  if (event.code === 'AltLeft' && isShiftPressed) {
+    currentLanguage = currentLanguage === 'en' ? 'ru' : 'en';
+    console.log('* currentLanguage', currentLanguage);
+  }
+
+  if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    isShiftPressed = !isShiftPressed;
+    button.forEach((key) => {
+      if (key.textContent.length === 1) {
+        key.textContent = keyboardCodeIndex[key.id].shiftValue[currentLanguage];
+      };
+    });
+  }
+
   document.getElementById(`${event.code}`).classList.add('active');
 };
+
 document.onkeyup = function (event) {
   textArea.focus();
+  if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    isShiftPressed = !isShiftPressed;
+    document.querySelectorAll('.keyboard__key').forEach((key) => {
+      if (key.textContent.length === 1) {
+        key.textContent = keyboardCodeIndex[key.id].value[currentLanguage];
+      }
+    });
+  }
+
   document.getElementById(`${event.code}`).classList.remove('active');
 };
 
-document.querySelectorAll('.keyboard__key').forEach((element) => {
-  textArea.focus();
-  element.onclick = function (event) {
-    document.querySelectorAll('.keyboard__key').forEach((element) => {
-      setTimeout(() => element.classList.remove('active'), 300);
-    });
-    this.classList.add('active');
-    if (element.classList.contains('space')) {
-      textArea.textContent += ' ';
-    } else if (element.classList.contains('enter')) {
-      textArea.textContent += '\n';
-    } else {
-      textArea.textContent += element.textContent;
-    }
-  };
-});
 
+// if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+//   isShiftPressed = !isShiftPressed;
+//   textArea.textContent += key.shiftValue[currentLanguage];
+// };
