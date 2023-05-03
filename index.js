@@ -1,10 +1,13 @@
-/* eslint-disable no-console */
-/* eslint-disable func-names */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-shadow */
-/* eslint-disable no-undef */
 const currentLanguage = 'en';
 const isShiftPressed = false;
+
+const text = document.createElement('h1');
+document.body.appendChild(text);
+text.innerHTML = 'Виртуальная RSS-клавиатура';
+const text1 = document.createElement('p');
+text1.classList.add('text');
+document.body.appendChild(text1);
+text1.innerHTML = 'Выполнено на Win10. Переключение языка - Alt + Shift.';
 
 const keyboardLayout = [
   [ // row 0
@@ -218,7 +221,7 @@ const textArea = document.createElement('textarea');
 textArea.classList.add('text-area');
 document.body.appendChild(textArea);
 
-const displayKeyboard = (keyboardLayout) => {
+const displayKeyboard = () => {
   const keyboard = document.createElement('div');
   keyboard.classList.add('keyboard');
   keyboardLayout.forEach((row) => {
@@ -244,43 +247,28 @@ const displayKeyboard = (keyboardLayout) => {
 displayKeyboard(keyboardLayout);
 
 document.onkeydown = function (event) {
-  console.log(event.code);
-  console.log(event.key);
-  document.querySelectorAll('.keyboard__key').forEach((element) => {
-    element.classList.remove('active');
-  });
+  textArea.focus();
   document.getElementById(`${event.code}`).classList.add('active');
+};
+document.onkeyup = function (event) {
+  textArea.focus();
+  document.getElementById(`${event.code}`).classList.remove('active');
 };
 
 document.querySelectorAll('.keyboard__key').forEach((element) => {
-  // eslint-disable-next-line no-param-reassign
+  textArea.focus();
   element.onclick = function (event) {
     document.querySelectorAll('.keyboard__key').forEach((element) => {
-      element.classList.remove('active');
+      setTimeout(() => element.classList.remove('active'), 300);
     });
-    const code = this.getAttribute('data');
     this.classList.add('active');
+    if (element.classList.contains('space')) {
+      textArea.textContent += ' ';
+    } else if (element.classList.contains('enter')) {
+      textArea.textContent += '\n';
+    } else {
+      textArea.textContent += element.textContent;
+    }
   };
 });
 
-const display = document.querySelector('.text-area');
-const button = document.querySelectorAll('.keyboard__key');
-
-// eslint-disable-next-line no-shadow
-button.forEach((button) => {
-  button.addEventListener('click', () => {
-    if (button.classList.contains('space')) {
-      display.textContent += ' ';
-    } else if (button.classList.contains('enter')) {
-      display.textContent += '\n';
-    } else {
-      display.textContent += button.textContent;
-    }
-  });
-});
-
-document.addEventListener('keydown', function(event) {
-  if (event.code == 'CapsLock') {
-    display.textContent.toUpperCase() += button.textContent;
-  }
-})
