@@ -1,10 +1,14 @@
-/* eslint-disable no-console */
-/* eslint-disable func-names */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-shadow */
 /* eslint-disable no-undef */
-const currentLanguage = 'en';
-const isShiftPressed = false;
+let currentLanguage = 'en';
+let isShiftPressed = false;
+
+const text = document.createElement('h1');
+document.body.appendChild(text);
+text.innerHTML = 'Виртуальная RSS-клавиатура';
+const text1 = document.createElement('p');
+text1.classList.add('text');
+document.body.appendChild(text1);
+text1.innerHTML = 'Выполнено на Win10. Переключение языка - Alt + Shift.';
 
 const keyboardLayout = [
   [ // row 0
@@ -214,11 +218,19 @@ const keyboardLayout = [
   ],
 ];
 
+const keyboardCodeIndex = keyboardLayout.reduce((acc, row) => {
+  const rowCodes = row.reduce((acc, key) => {
+    acc[key.code] = key;
+    return acc;
+  }, {});
+  return { ...acc, ...rowCodes };
+}, {});
+
 const textArea = document.createElement('textarea');
 textArea.classList.add('text-area');
 document.body.appendChild(textArea);
 
-const displayKeyboard = (keyboardLayout) => {
+const displayKeyboard = () => {
   const keyboard = document.createElement('div');
   keyboard.classList.add('keyboard');
   keyboardLayout.forEach((row) => {
@@ -235,52 +247,67 @@ const displayKeyboard = (keyboardLayout) => {
         : key.value[currentLanguage];
       keyEl.id = `${key.code}`;
       rowEl.appendChild(keyEl);
+
+      keyEl.onclick = function (event) {
+        keyEl.classList.add('active');
+        switch (key.code) {
+          case 'Space':
+            textArea.textContent += ' ';
+            break;
+          case 'Enter':
+            textArea.textContent += '\n';
+            break;
+          default:
+            textArea.textContent += key.value[currentLanguage];
+        }
+
+        setTimeout(() => keyEl.classList.remove('active'), 300);
+      };
     });
     keyboard.appendChild(rowEl);
   });
   document.body.appendChild(keyboard);
 };
+displayKeyboard();
 
-displayKeyboard(keyboardLayout);
+const button = document.querySelectorAll('.keyboard__key');
 
-document.onkeydown = function (event) {
-  console.log(event.code);
-  console.log(event.key);
-  document.querySelectorAll('.keyboard__key').forEach((element) => {
-    element.classList.remove('active');
-  });
+document.onkeydown = function(event) {
+  textArea.focus();
+
+  if (event.code === 'AltLeft' && isShiftPressed) {
+    currentLanguage = currentLanguage === 'en' ? 'ru' : 'en';
+    console.log('* currentLanguage', currentLanguage);
+  }
+
+  if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    isShiftPressed = !isShiftPressed;
+    button.forEach((key) => {
+      if (key.textContent.length === 1) {
+        key.textContent = keyboardCodeIndex[key.id].shiftValue[currentLanguage];
+      };
+    });
+  }
+
   document.getElementById(`${event.code}`).classList.add('active');
 };
 
-document.querySelectorAll('.keyboard__key').forEach((element) => {
-  // eslint-disable-next-line no-param-reassign
-  element.onclick = function (event) {
-    document.querySelectorAll('.keyboard__key').forEach((element) => {
-      element.classList.remove('active');
+document.onkeyup = function (event) {
+  textArea.focus();
+  if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+    isShiftPressed = !isShiftPressed;
+    document.querySelectorAll('.keyboard__key').forEach((key) => {
+      if (key.textContent.length === 1) {
+        key.textContent = keyboardCodeIndex[key.id].value[currentLanguage];
+      }
     });
-    const code = this.getAttribute('data');
-    this.classList.add('active');
-  };
-});
-
-const display = document.querySelector('.text-area');
-const button = document.querySelectorAll('.keyboard__key');
-
-// eslint-disable-next-line no-shadow
-button.forEach((button) => {
-  button.addEventListener('click', () => {
-    if (button.classList.contains('space')) {
-      display.textContent += ' ';
-    } else if (button.classList.contains('enter')) {
-      display.textContent += '\n';
-    } else {
-      display.textContent += button.textContent;
-    }
-  });
-});
-
-document.addEventListener('keydown', function(event) {
-  if (event.code == 'CapsLock') {
-    display.textContent.toUpperCase() += button.textContent;
   }
-})
+
+  document.getElementById(`${event.code}`).classList.remove('active');
+};
+
+
+// if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+//   isShiftPressed = !isShiftPressed;
+//   textArea.textContent += key.shiftValue[currentLanguage];
+// };
